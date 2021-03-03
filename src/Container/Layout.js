@@ -1,24 +1,15 @@
 import React, {useState, useEffect, useCallback} from 'react';
 import "../App/App.css";
-// import AppBar from "../Components/AppBar";
-import { BrowserRouter, Link, Switch, Route, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
-// import Assessment from "../Container/Assessment";
 import { Grid, Box ,Typography} from "@material-ui/core";
-// import RightContent from "../Components/RightContent";
-import Button from "../Components/Button";
-// import AccountsCard from './Accordions';
 import TimeFnsUtils from "@date-io/date-fns"
-// import MomentUtils from "@date-io/moment";
 import AddCircleIcon from "@material-ui/icons/AddCircle"
 import {map, get, isEmpty, filter} from 'lodash'
 import DeleteIcon from "@material-ui/icons/DeleteOutline"
-import { getPSTFromLocal, getLocalFromPST } from '../utils/timeSrv'
 import {
   MuiPickersUtilsProvider,
-  TimePicker,
-  KeyboardTimePicker,
-  DatePicker
+  KeyboardTimePicker
 } from "@material-ui/pickers"
 import moment from "moment"
 import { useSelector, useDispatch } from 'react-redux'
@@ -86,13 +77,6 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-// let eventObj = {
-//   eventTimings: [{
-//     startTime:moment(new Date()).hours(9).startOf('hour').format(),
-//     endTime:moment(new Date()).hours(17).startOf('hour').format()
-//   }]
-// }
-
 export default (props) => {
   let history = useHistory();
 
@@ -104,7 +88,6 @@ export default (props) => {
   const details = useSelector(state => state.createEditEventReducer.eventObj.details)
   const selectedId = useSelector(state => state.createEditEventReducer.selectedId)
 
-  console.log("redux store value is*****", eventObj)
 
   const makeId = () => {
     let ID = "";
@@ -115,7 +98,6 @@ export default (props) => {
     return ID;
   }
 
-  // const [eventTiming, setEventTiming] = useState(eventObj.eventTimings || []);
   const [startTime, setStartTime] = useState(moment(new Date()).hours(9).startOf('hour').format());
   const [endTime, setEndTime] = useState(moment(new Date()).hours(17).startOf('hour').format());
   const [id, setId] = useState(makeId())
@@ -135,17 +117,6 @@ export default (props) => {
     history.push("/details");
   }
 
-  //Onchange function for time
-  // const handleStartTimeChange = (field, newTime, index) => {
-  //   setStartTime(newTime);
-  //   eventTiming[index][field] = newTime
-  //   eventObj= {...eventObj, eventTiming}
-  // };
-  // const handleEndTimeChange = (field, newTime, index) => {
-  //   setEndTime(newTime);
-  //   eventTiming[index][field] = newTime
-  //   eventObj= {...eventObj, eventTiming}
-  // };
 
   // Add new date function
   const addNewDate = useCallback((value, ignoreCheck)  => {
@@ -182,12 +153,9 @@ export default (props) => {
     updateField("eventTimings[" + index + "][" + field + "]", newTime)
   }  
 
-  // const users = filter(details, (user, index) => (user?.selectedId))[0]
-  // console.log("userValue*****", filter(details, (user, index) => (user?.selectedId)))
 
 
-  // Remove date functionality
-
+  // Remove time slot if greater than one slot
   const removeTime = index => {
     if (!isEmpty(eventObj.eventTimings[index])) {
       if (eventObj.eventTimings[index].id) {
@@ -200,13 +168,8 @@ export default (props) => {
       }
     }
   }
-  // const removeDate = index => {
-  //   if (!isEmpty(eventTiming[index])) {
-  //     console.log("an item is deleted successfully")
-  //     setEventTiming([{deleted:true}, ...eventTiming])
-  //     eventTiming.splice(index, 1);
-  //   }
-  // }
+
+  //we can use for time interval in timepicker
   const timeConstraints = { minutes: { step: 15 } }
   return (
     <main>
