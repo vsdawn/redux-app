@@ -63,17 +63,13 @@ export default () => {
   const updateField = useCallback((field, value, ignoreCheck) => dispatch({type: 'UPDATE_FIELD', field, value, ignoreCheck}), [dispatch])
     
   const handleSave = () => {
-    debugger
     if(firstName && lastName && phone){
       let index
       index = findIndex(eventObj?.details, details => details.selectedId == selectedId) 
       if(index == -1){
         index = get(eventObj, "details").length
       }
-      console.log("index value is***",findIndex(eventObj?.details, details => details.selectedId == selectedId))
-      // const index = get(eventObj, "details").length
       let userValue = {firstName,lastName,phone,status:true,selectedId}
-      // dispatch({ type: "DETAILS_STATUS", details:{firstName,lastName,phone,status:true} })
       updateField("details[" + index + "]", userValue, true)
       dispatch({type:'SELECTED_ID', selectedId})
       setEmpty(false)
