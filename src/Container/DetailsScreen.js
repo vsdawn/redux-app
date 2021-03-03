@@ -4,7 +4,7 @@ import { useHistory } from "react-router-dom";
 import { Grid, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useSelector, useDispatch } from 'react-redux'
-import {map, get, isEmpty, filter} from 'lodash'
+import {map, get, isEmpty, filter, findIndex} from 'lodash'
 
 const useStyles = makeStyles((theme) => ({
   mainText: {
@@ -63,8 +63,15 @@ export default () => {
   const updateField = useCallback((field, value, ignoreCheck) => dispatch({type: 'UPDATE_FIELD', field, value, ignoreCheck}), [dispatch])
     
   const handleSave = () => {
+    debugger
     if(firstName && lastName && phone){
-      const index = get(eventObj, "details").length
+      let index
+      index = findIndex(eventObj?.details, details => details.selectedId == selectedId) 
+      if(index == -1){
+        index = get(eventObj, "details").length
+      }
+      console.log("index value is***",findIndex(eventObj?.details, details => details.selectedId == selectedId))
+      // const index = get(eventObj, "details").length
       let userValue = {firstName,lastName,phone,status:true,selectedId}
       // dispatch({ type: "DETAILS_STATUS", details:{firstName,lastName,phone,status:true} })
       updateField("details[" + index + "]", userValue, true)
@@ -93,7 +100,7 @@ export default () => {
               <TextField
                 required
                 label="First Name"
-                value={users?.firstName || firstName}
+                value={firstName}
                 onChange={e => setFirstName(e.target.value)}
                 margin="normal"
                 variant="outlined"
@@ -105,7 +112,7 @@ export default () => {
               <TextField
                 required
                 label="Last Name"
-                value={users?.lastName || lastName}
+                value={lastName}
                 onChange={e => setLastName(e.target.value)}
                 margin="normal"
                 variant="outlined"
@@ -117,7 +124,7 @@ export default () => {
               <TextField
                 required
                 label="Phone Number"
-                value={users?.phone || phone}
+                value={phone}
                 onChange={e => setPhone(e.target.value)}
                 margin="normal"
                 variant="outlined"
