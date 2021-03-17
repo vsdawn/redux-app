@@ -4,7 +4,7 @@ import { useHistory } from "react-router-dom";
 import { Grid, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useSelector, useDispatch } from 'react-redux'
-import {map, get, isEmpty, filter, findIndex} from 'lodash'
+import axios from 'axios'
 
 const useStyles = makeStyles((theme) => ({
   mainText: {
@@ -19,29 +19,21 @@ const useStyles = makeStyles((theme) => ({
     margin:"50px",
     width:"700px"
   },
-  btnStyle1: {
-    backgroundColor:"chocolate",
+  categoryBox: {
+    backgroundColor:"white",
     padding:"10px",
+    marginTop:"10px",
+    border:"2px solid gray",
     borderRadius:"10px",
-    margin:"10px",
-    color:"white",
-    width:"70px",
-    border:"none"
+    cursor:"pointer",
   },
-  btnStyle2: {
-    backgroundColor:"#fff",
-    padding:"10px",
-    borderRadius:"10px",
-    margin:"10px",
-    color:"#000",
-    width:"70px",
-    border:"none"
+  category: {
+    fontSize:"24px",
+    color:"chocolate",
+    textAlign:"left",
   },
-  errText: {
-    color:"red",
-    marginTop:"5px",
-  }
 }));
+
 
 
 export default () => {
@@ -49,182 +41,124 @@ export default () => {
   const classes = useStyles();
 
   const dispatch = useDispatch();
-
-  const eventObj = useSelector(state => state.createEditEventReducer.eventObj)
   const details = useSelector(state => state.createEditEventReducer.eventObj.details)
-  const selectedId = useSelector(state => state.createEditEventReducer.selectedId)
-  const users = filter(details, (user, index) => (user?.selectedId == selectedId))[0]
 
-  const [firstName, setFirstName] = useState(users?.firstName || '')
-  const [lastName, setLastName] = useState(users?.lastName || '')
-  const [phone, setPhone] = useState(users?.phone || '')
-  const [empty, setEmpty] = useState(false)
+  const[items, setItems] = useState([])
+  const[cat, setCat] = useState("")
+
+  
   let history = useHistory();
-  const updateField = useCallback((field, value, ignoreCheck) => dispatch({type: 'UPDATE_FIELD', field, value, ignoreCheck}), [dispatch])
-    
-  const handleSave = () => {
-    if(firstName && lastName && phone){
-      let index
-      index = findIndex(eventObj?.details, details => details.selectedId == selectedId) 
-      if(index == -1){
-        index = get(eventObj, "details").length
-      }
-      let userValue = {firstName,lastName,phone,status:true,selectedId}
-      updateField("details[" + index + "]", userValue, true)
-      dispatch({type:'SELECTED_ID', selectedId})
-      setEmpty(false)
-      history.push("/");
-    } else {
-      setEmpty(true)
+
+  const handleCategory = (category) => {
+    var url
+    if(category == "Capsules"){
+      url = "https://api.spacexdata.com/v3/capsules"
+    } else if(category == "Cores"){
+      url = "https://api.spacexdata.com/v3/cores"
+    } else if(category == "Dragons"){
+      url = "https://api.spacexdata.com/v3/dragons"
+    } else if(category == "History"){
+      url = "https://api.spacexdata.com/v3/history"
+    } else if(category == "Launches"){
+      url = "https://api.spacexdata.com/v3/launches"
     }
+
+    axios.get(url)
+    .then(function (response) {
+      // handle success
+      console.log("userList Value is*******",response);
+      setItems(response?.data?.slice(0, 5))
+      setCat(category)
+      console.log("items value*******", items)
+    })
+    .catch(function (error) {
+      console.log(error);
+    })
+
   }
-
-
-  const handleCancel = () => {
-    history.push("/");
-  }
-
-
+  
   return (
     <>
     <Grid className={classes.mainContainer} spacing={2}>
-      <Typography className={classes.mainText}>User Details</Typography>
-      {!isEmpty(details) ?  (
+      <Typography className={classes.mainText}>{"User Details" + " " + ("email: " + details[0]?.email)}</Typography>
+      <Typography className={classes.mainText}>I am showing maximum 5 data from every array(response data).</Typography>
         <Grid>
-          <Grid>
-            <Grid item>
-              <TextField
-                required
-                label="First Name"
-                value={firstName}
-                onChange={e => setFirstName(e.target.value)}
-                margin="normal"
-                variant="outlined"
-                size="small"
-                // fullWidth
-              />
-            </Grid>
-            <Grid item>
-              <TextField
-                required
-                label="Last Name"
-                value={lastName}
-                onChange={e => setLastName(e.target.value)}
-                margin="normal"
-                variant="outlined"
-                size="small"
-                // fullWidth
-              />
-            </Grid>
-            <Grid item>
-              <TextField
-                required
-                label="Phone Number"
-                value={phone}
-                onChange={e => setPhone(e.target.value)}
-                margin="normal"
-                variant="outlined"
-                size="small"
-                // fullWidth
-              />
-            </Grid>
-            {empty && <Typography className={classes.errText}>All fields are required</Typography>}
-            <Grid>
-              <button className={classes.btnStyle1} onClick={handleSave}>Save</button>
-              <button className={classes.btnStyle2} onClick={handleCancel}>Cancel</button>
-            </Grid>
+          <Grid onClick={() => handleCategory("Capsules")} className={classes.categoryBox}>
+            <Typography className={classes.category}>Capsules</Typography>
+            {cat == "Capsules" && items?.map(item => {
+            return <Grid container>
+              <Grid item xs={4}>
+                <Typography>{item.capsule_serial}</Typography>
+              </Grid>
+              <Grid item xs={4}>
+                <Typography>{item.capsule_id}</Typography>
+              </Grid>
+              <Grid item xs={4}>
+                <Typography>{item.details}</Typography>
+              </Grid>
+            </Grid>})}
+          </Grid>
+          <Grid onClick={() => handleCategory("Cores")} className={classes.categoryBox}>
+            <Typography className={classes.category}>Cores</Typography>
+            {cat == "Cores" && items?.map(item => {
+            return <Grid container>
+              <Grid item xs={4}>
+                <Typography>{item.core_serial}</Typography>
+              </Grid>
+              <Grid item xs={4}>
+                <Typography>{item.status}</Typography>
+              </Grid>
+              <Grid item xs={4}>
+                <Typography>{item.details}</Typography>
+              </Grid>
+            </Grid>})}
+          </Grid>
+          <Grid onClick={() => handleCategory("Dragons")} className={classes.categoryBox}>
+            <Typography className={classes.category}>Dragons</Typography>
+            {cat == "Dragons" && items?.map(item => {
+            return <Grid container>
+              <Grid item xs={4}>
+                <Typography>{item.name}</Typography>
+              </Grid>
+              <Grid item xs={4}>
+                <Typography>{item.id}</Typography>
+              </Grid>
+              <Grid item xs={4}>
+                <Typography>{item.description}</Typography>
+              </Grid>
+            </Grid>})}
+          </Grid>
+          <Grid onClick={() => handleCategory("History")} className={classes.categoryBox}>
+            <Typography className={classes.category}>History</Typography>
+            {cat == "History" && items?.map(item => {
+            return <Grid container>
+              <Grid item xs={4}>
+                <Typography>{item.title}</Typography>
+              </Grid>
+              <Grid item xs={4}>
+                <Typography>{item.flight_number}</Typography>
+              </Grid>
+              <Grid item xs={4}>
+                <Typography>{item.details}</Typography>
+              </Grid>
+            </Grid>})}
+          </Grid>
+          <Grid onClick={() => handleCategory("Launches")} className={classes.categoryBox}>
+            <Typography className={classes.category}>Launches</Typography>
+            {cat == "Launches" && items?.map(item => {
+            return <Grid container>
+              <Grid item xs={4}>
+                <Typography>{item.mission_name}</Typography>
+              </Grid>
+              <Grid item xs={4}>
+                <Typography>{item.flight_number}</Typography>
+              </Grid>
+              <Grid item xs={4}>
+                <Typography>{item.details}</Typography>
+              </Grid>
+            </Grid>})}
           </Grid>
         </Grid>
-        ) :
-        <Grid>
-          <Grid item>
-            <TextField
-              required
-              label="First Name"
-              value={firstName}
-              onChange={e => setFirstName(e.target.value)}
-              margin="normal"
-              variant="outlined"
-              size="small"
-              // fullWidth
-            />
-          </Grid>
-          <Grid item>
-            <TextField
-              required
-              label="Last Name"
-              value={lastName}
-              onChange={e => setLastName(e.target.value)}
-              margin="normal"
-              variant="outlined"
-              size="small"
-              // fullWidth
-            />
-          </Grid>
-          <Grid item>
-            <TextField
-              required
-              label="Phone Number"
-              value={phone}
-              onChange={e => setPhone(e.target.value)}
-              margin="normal"
-              variant="outlined"
-              size="small"
-              // fullWidth
-            />
-          </Grid>
-          {empty && <Typography className={classes.errText}>All fields are required</Typography>}
-          <Grid>
-            <button className={classes.btnStyle1} onClick={handleSave}>Save</button>
-            <button className={classes.btnStyle2} onClick={handleCancel}>Cancel</button>
-          </Grid>
-        </Grid>
-        }
-        {/* {!isEmpty(details) && map(details, (user, index) => (user.selectedId != selectedId) && (
-        <Grid>
-          <Grid item>
-            <TextField
-              required
-              label="First Name"
-              value={firstName}
-              onChange={e => setFirstName(e.target.value)}
-              margin="normal"
-              variant="outlined"
-              size="small"
-              // fullWidth
-            />
-          </Grid>
-          <Grid item>
-            <TextField
-              required
-              label="Last Name"
-              value={lastName}
-              onChange={e => setLastName(e.target.value)}
-              margin="normal"
-              variant="outlined"
-              size="small"
-              // fullWidth
-            />
-          </Grid>
-          <Grid item>
-            <TextField
-              required
-              label="Phone Number"
-              value={phone}
-              onChange={e => setPhone(e.target.value)}
-              margin="normal"
-              variant="outlined"
-              size="small"
-              // fullWidth
-            />
-          </Grid>
-          {empty && <Typography className={classes.errText}>All fields are required</Typography>}
-          <Grid>
-            <button className={classes.btnStyle1} onClick={handleSave}>Save</button>
-            <button className={classes.btnStyle2} onClick={handleCancel}>Cancel</button>
-          </Grid>
-        </Grid>
-        ))} */}
     </Grid>
   </>
   )

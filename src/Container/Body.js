@@ -1,8 +1,8 @@
 import React from 'react';
 import "../App/App.css";
 import { BrowserRouter, Switch, Route, useHistory } from "react-router-dom";
-import Layout from './Layout';
 import DetailsScreen from './DetailsScreen';
+import Login from './Login';
 
 
 export default (props) => {
@@ -12,7 +12,7 @@ export default (props) => {
       <main>
         {/* <BodyLayout/> */}
             <Switch>
-              <Route exact path="/" component={Layout}/>
+              <Route exact path="/" component={Login}/>
               <Route exact path="/details" component={DetailsScreen}/>
             </Switch>
       </main>
